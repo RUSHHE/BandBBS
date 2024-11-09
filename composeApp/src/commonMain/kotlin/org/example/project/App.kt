@@ -17,11 +17,13 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Article
+import androidx.compose.material.icons.filled.Category
 import androidx.compose.material.icons.filled.ChatBubbleOutline
 import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.StackedBarChart
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -51,6 +53,7 @@ import com.example.bandbbs.http.model.Node
 import org.example.project.component.DiscoverScreen
 import org.example.project.component.HomeScreen
 import org.example.project.component.ProfileScreen
+import org.example.project.component.ResourceScreen
 import org.example.project.theme.ThemeManager
 import org.example.project.theme.ThemeType
 import org.jetbrains.compose.ui.tooling.preview.Preview
@@ -100,6 +103,9 @@ fun NavHostContainer(navController: NavHostController) {
     NavHost(navController = navController, startDestination = "home") {
         composable("home") {
             HomeScreen()
+        }
+        composable("resource") {
+            ResourceScreen()
         }
         composable("discover") {
             DiscoverScreen()
@@ -330,6 +336,7 @@ fun MainCenterAlignedTopAppBar() {
 fun MainNavigationBar(navController: NavHostController) {
     val items = listOf(
         NavigationItem("home", Icons.Default.Home, "首页"),
+        NavigationItem("resource", Icons.Default.Category, "资源"),
         NavigationItem("discover", Icons.Default.Dashboard, "发现"),
         NavigationItem("profile", Icons.Default.Person, "我的")
     )
