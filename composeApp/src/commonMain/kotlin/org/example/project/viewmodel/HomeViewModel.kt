@@ -10,6 +10,7 @@ import com.fleeksoft.ksoup.network.parseGetRequest
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import org.example.project.Status
 
 class HomeViewModel : ViewModel() {
 
@@ -18,8 +19,8 @@ class HomeViewModel : ViewModel() {
     }
 
     // 使用MutableStateFlow来持有数据状态
-    private val _dataState = MutableStateFlow<Resource<List<Block>>>(Resource.Loading())
-    val dataState: StateFlow<Resource<List<Block>>> = _dataState
+    private val _dataState = MutableStateFlow<Status<List<Block>>>(Status.Loading())
+    val dataState: StateFlow<Status<List<Block>>> = _dataState
 
     fun fetchData(url: String) {
         viewModelScope.launch {
@@ -27,7 +28,7 @@ class HomeViewModel : ViewModel() {
                 val document = Ksoup.parseGetRequest(url)
 
                 // 更新状态为成功，并携带数据
-                _dataState.value = Resource.Success(
+                _dataState.value = Status.Success(
                     document.select(".block--category").map { it ->
                         Block(
                             name = it.select("h2").text(),
@@ -54,15 +55,8 @@ class HomeViewModel : ViewModel() {
                 )
             } catch (e: Exception) {
                 // 如果发生错误，更新状态为错误，并携带异常信息
-                _dataState.value = Resource.Error(e.message ?: "Unknown error")
+                _dataState.value = Status.Error(e.message ?: "Unknown error")
             }
         }
     }
-}
-
-// 定义资源状态sealed class来表示加载状态
-sealed class Resource<T>(val data: T? = null, val message: String? = null) {
-    class Loading<T>(data: T? = null) : Resource<T>(data)
-    class Success<T>(data: T) : Resource<T>(data)
-    class Error<T>(message: String, data: T? = null) : Resource<T>(data, message)
 }

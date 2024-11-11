@@ -8,6 +8,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.example.bandbbs.http.model.Block
 import com.example.bandbbs.http.model.Extra
 import com.example.bandbbs.http.model.Node
+import org.example.project.component.ResourceItem
+import org.example.project.model.Resource
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -56,4 +58,24 @@ fun BlockItemPreview() {
         )
     )
     BlockItem(listOf(block))
+}
+
+@Preview(showBackground = true)
+@Composable
+fun ResourceItemPreview() {
+    ResourceItem(
+        Resource(
+            title = "Test Resource",
+            subTitle = "https://example.com/test-resource",
+            version = "1.0.0",
+            icon = "",
+            category = "Test Category",
+            label = "Test Label",
+            score = "0.0",
+            download = "0",
+            authorName = "John Doe",
+            authorAvatar = "",
+            time = "2023-05-01",
+            )
+        )
 }
