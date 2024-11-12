@@ -3,7 +3,6 @@ package org.example.project
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -17,27 +16,19 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Article
-import androidx.compose.material.icons.filled.Category
 import androidx.compose.material.icons.filled.ChatBubbleOutline
-import androidx.compose.material.icons.filled.Dashboard
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.StackedBarChart
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -57,6 +48,9 @@ import org.example.project.component.ResourceScreen
 import org.example.project.theme.ThemeManager
 import org.example.project.theme.ThemeType
 import org.jetbrains.compose.ui.tooling.preview.Preview
+import top.yukonga.miuix.kmp.basic.NavigationBar
+import top.yukonga.miuix.kmp.basic.NavigationItem
+import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.basic.Box as MiuixBox
 import top.yukonga.miuix.kmp.basic.Card as MiuixCard
@@ -67,14 +61,16 @@ import top.yukonga.miuix.kmp.utils.HorizontalDivider as MiuixHorizontalDivider
 @Composable
 @Preview
 fun App() {
+    var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.HOME) }
+
     if (ThemeManager.currentTheme == ThemeType.Miuix) {
         MiuixTheme(
             colors = if (isSystemInDarkTheme()) top.yukonga.miuix.kmp.theme.darkColorScheme() else top.yukonga.miuix.kmp.theme.lightColorScheme()
         ) {
             val navController: NavHostController = rememberNavController()
             MiuixScaffold(
-                topBar = { MainCenterAlignedTopAppBar() },
-                bottomBar = { MainNavigationBar(navController) },
+                topBar = { MiuixTopAppBar() },
+                bottomBar = { MiuixNavigationBar(navController) },
             ) { paddingValues ->
                 MiuixBox(Modifier.padding(paddingValues)) {
                     NavHostContainer(navController)
@@ -85,13 +81,28 @@ fun App() {
         MaterialTheme(
             colorScheme = if (isSystemInDarkTheme()) androidx.compose.material3.darkColorScheme() else androidx.compose.material3.lightColorScheme()
         ) {
-            val navController: NavHostController = rememberNavController()
-            Scaffold(
-                topBar = { MainCenterAlignedTopAppBar() },
-                bottomBar = { MainNavigationBar(navController) },
-            ) { paddingValues ->
-                Box(Modifier.padding(paddingValues)) {
-                    NavHostContainer(navController)
+            NavigationSuiteScaffold(
+                navigationSuiteItems = {
+                    AppDestinations.entries.forEach {
+                        item(
+                            icon = {
+                                Icon(
+                                    it.icon,
+                                    contentDescription = it.contentDescription
+                                )
+                            },
+                            label = { Text(it.label) },
+                            selected = it == currentDestination,
+                            onClick = { currentDestination = it }
+                        )
+                    }
+                }
+            ) {
+                when (currentDestination) {
+                    AppDestinations.HOME -> HomeScreen()
+                    AppDestinations.RESOURCE -> ResourceScreen()
+                    AppDestinations.DISCOVER -> DiscoverScreen()
+                    AppDestinations.PROFILE -> ProfileScreen()
                 }
             }
         }
@@ -307,61 +318,35 @@ fun ExtraItem(node: Node) {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Preview
 @Composable
-fun MainCenterAlignedTopAppBar() {
-    CenterAlignedTopAppBar(
-        title = {
-//            Image(
-//                painter = rememberAsyncImagePainter(
-//                    ImageRequest.Builder(LocalContext.current)
-//                        .data("https://static.cloudflare.ltd/Bandbbs_CDN/styles/bandbbs_new_svg/logo.svg")
-//                        .decoderFactory(SvgDecoder.Factory())  // 使用 SvgDecoder
-//                        .build()
-//                ),
-//                contentDescription = null,
-//                modifier = Modifier.size(100.dp)
-//            )
+fun MiuixTopAppBar() {
+    // TODO: 添加Miuix风格导航栏
+    TopAppBar(
+        title = "BandBBS",
+    )
+}
+
+@Composable
+fun MiuixNavigationBar(navController: NavHostController) {
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
+
+    NavigationBar(
+        items = AppDestinations.entries.map { item ->
+            NavigationItem(
+                label = item.label,
+                icon = item.icon,
+            )
         },
-        navigationIcon = {
-            IconButton(onClick = { }) {
-                Icon(Icons.Default.Menu, contentDescription = null)
+        selected = AppDestinations.entries.map { it.route }.indexOf(currentRoute),
+        onClick = {
+            navController.navigate(AppDestinations.entries[it].route) {
+                popUpTo(navController.graph.startDestinationId) {
+                    saveState = true
+                }
+                launchSingleTop = true
+                restoreState = true
             }
         }
     )
 }
-
-@Composable
-fun MainNavigationBar(navController: NavHostController) {
-    val items = listOf(
-        NavigationItem("home", Icons.Default.Home, "首页"),
-        NavigationItem("resource", Icons.Default.Category, "资源"),
-        NavigationItem("discover", Icons.Default.Dashboard, "发现"),
-        NavigationItem("profile", Icons.Default.Person, "我的")
-    )
-
-    val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val currentRoute = navBackStackEntry?.destination?.route
-
-    NavigationBar {
-        items.forEach { item ->
-            NavigationBarItem(
-                selected = currentRoute == item.route,
-                icon = { Icon(item.icon, contentDescription = null) },
-                label = { Text(item.label) },
-                onClick = {
-                    navController.navigate(item.route) {
-                        popUpTo(navController.graph.startDestinationId) {
-                            saveState = true
-                        }
-                        launchSingleTop = true
-                        restoreState = true
-                    }
-                }
-            )
-        }
-    }
-}
-
-data class NavigationItem(val route: String, val icon: ImageVector, val label: String)
