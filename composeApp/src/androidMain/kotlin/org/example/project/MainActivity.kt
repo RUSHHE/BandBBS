@@ -8,6 +8,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.example.bandbbs.http.model.Block
 import com.example.bandbbs.http.model.Extra
 import com.example.bandbbs.http.model.Node
+import org.example.project.component.BlockItem
 import org.example.project.component.ResourceItem
 import org.example.project.model.Resource
 
@@ -76,6 +77,6 @@ fun ResourceItemPreview() {
             authorName = "John Doe",
             authorAvatar = "",
             time = "2023-05-01",
-            )
         )
+    )
 }
