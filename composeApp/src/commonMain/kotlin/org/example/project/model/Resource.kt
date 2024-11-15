@@ -12,4 +12,4 @@ data class Resource(
     val authorName: String,
     val authorAvatar: String,
     val time: String,
-)
+) : Discover()
